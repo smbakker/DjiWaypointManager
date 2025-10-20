@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using IOPath = System.IO.Path;
 using IOFile = System.IO.File;
 using IODirectory = System.IO.Directory;
@@ -29,26 +30,82 @@ namespace DjiWaypointManager
             InitializeComponent();
             Loaded += MainWindow_Loaded;
             Closing += MainWindow_Closing;
+            
+            // Initialize status bar
+            InitializeStatusBar();
+        }
+
+        private void InitializeStatusBar()
+        {
+            UpdateStatusBar("Application starting...", false);
+            UpdateDeviceCount(0);
+            UpdateConnectionStatus(false);
+        }
+
+        private void UpdateStatusBar(string message, bool showProgress = false, bool includeTimestamp = false)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var displayMessage = includeTimestamp 
+                    ? $"[{DateTime.Now:HH:mm:ss}] {message}"
+                    : message;
+                    
+                StatusBarText.Text = displayMessage;
+                ScanningIndicator.Visibility = showProgress ? Visibility.Visible : Visibility.Collapsed;
+            });
+        }
+
+        private void UpdateDeviceCount(int count)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                DeviceCountText.Text = count.ToString();
+            });
+        }
+
+        private void UpdateConnectionStatus(bool isConnected, string deviceName = "")
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (isConnected)
+                {
+                    ConnectionStatusIndicator.Fill = new SolidColorBrush(Colors.Green);
+                    ConnectionStatusText.Text = $"Connected: {deviceName}";
+                }
+                else
+                {
+                    ConnectionStatusIndicator.Fill = new SolidColorBrush(Colors.Red);
+                    ConnectionStatusText.Text = "Disconnected";
+                }
+            });
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
+                UpdateStatusBar("Initializing WebView...");
+                
                 // Initialize WebView2
                 await InitializeWebViewAsync();
                 
+                UpdateStatusBar("Initializing device detection...");
+                
                 // Initialize DJI device detection
                 InitializeDjiDetection();
+                
+                UpdateStatusBar("Ready");
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Error: {ex.Message}");
                 MessageBox.Show($"Error initializing application: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            UpdateStatusBar("Shutting down...");
             _djiDetector?.Dispose();
         }
 
@@ -65,6 +122,7 @@ namespace DjiWaypointManager
             
             if (!IOFile.Exists(htmlPath))
             {
+                UpdateStatusBar("Error: map.html not found");
                 MessageBox.Show($"Error initializing WebView2: Could not load map.html", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -82,14 +140,26 @@ namespace DjiWaypointManager
                 _djiDetector = new DjiRemoteControlDetector();
                 _djiDetector.RemoteControlConnected += OnDjiDeviceConnected;
                 _djiDetector.RemoteControlDisconnected += OnDjiDeviceDisconnected;
+                _djiDetector.ScanStatusChanged += OnScanStatusChanged;
                 _djiDetector.StartMonitoring();
 
-                UpdateDeviceStatus("Scanning for DJI devices...");
+                UpdateStatusBar("Initializing device scanner...", true);
+                UpdateDeviceStatus("Initializing device scanner...");
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Device scan error: {ex.Message}");
                 UpdateDeviceStatus($"Error initializing device detection: {ex.Message}");
             }
+        }
+
+        private void OnScanStatusChanged(string status)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                UpdateStatusBar(status, status.Contains("Scanning") || status.Contains("rescanning"));
+                UpdateDeviceStatus(status);
+            });
         }
 
         private void OnDjiDeviceConnected(DjiRemoteControlDevice device)
@@ -97,7 +167,17 @@ namespace DjiWaypointManager
             Dispatcher.Invoke(() =>
             {
                 UpdateDeviceComboBox();
+                var deviceCount = _djiDetector?.GetConnectedDevices()?.Count ?? 0;
+                UpdateDeviceCount(deviceCount);
+                
                 UpdateDeviceStatus($"DJI device connected: {device.Name}");
+                UpdateStatusBar($"Device connected: {device.Name}", false, true);
+                
+                // Update connection status if this is the first/selected device
+                if (_selectedDevice?.DeviceId == device.DeviceId || _selectedDevice == null)
+                {
+                    UpdateConnectionStatus(true, device.Name);
+                }
             });
         }
 
@@ -106,13 +186,25 @@ namespace DjiWaypointManager
             Dispatcher.Invoke(() =>
             {
                 UpdateDeviceComboBox();
+                var deviceCount = _djiDetector?.GetConnectedDevices()?.Count ?? 0;
+                UpdateDeviceCount(deviceCount);
+                
                 if (_selectedDevice?.DeviceId == device.DeviceId)
                 {
                     _selectedDevice = null;
                     LoadFromDeviceButton.IsEnabled = false;
                     DeviceFilesListBox.Items.Clear();
+                    UpdateConnectionStatus(false);
                 }
+                
                 UpdateDeviceStatus($"DJI device disconnected: {device.Name}");
+                UpdateStatusBar($"Device disconnected: {device.Name}", false, true);
+                
+                // If no devices remain, update status accordingly
+                if (deviceCount == 0)
+                {
+                    UpdateStatusBar("No DJI devices connected");
+                }
             });
         }
 
@@ -142,6 +234,7 @@ namespace DjiWaypointManager
             if (e.IsSuccess)
             {
                 _isWebViewReady = true;
+                UpdateStatusBar("Map loaded successfully");
                 System.Diagnostics.Debug.WriteLine("WebView navigation completed successfully");
 
                 // If we already have a mission loaded, render it now
@@ -152,6 +245,7 @@ namespace DjiWaypointManager
             }
             else
             {
+                UpdateStatusBar("Failed to load map");
                 System.Diagnostics.Debug.WriteLine($"WebView navigation failed: {e.WebErrorStatus}");
             }
         }
@@ -166,6 +260,8 @@ namespace DjiWaypointManager
 
             try
             {
+                UpdateStatusBar("Rendering mission on map...");
+                
                 System.Diagnostics.Debug.WriteLine($"Rendering mission: {_mission.Waypoints.Count} waypoints, {_mission.Pois.Count} POIs");
 
                 // Debug waypoint UseStraightLine values
@@ -247,10 +343,12 @@ namespace DjiWaypointManager
                 }}";
                 
                 await _webView.CoreWebView2.ExecuteScriptAsync(script);
+                UpdateStatusBar("Mission rendered successfully");
                 System.Diagnostics.Debug.WriteLine("Mission render script executed");
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Error rendering mission: {ex.Message}");
                 MessageBox.Show($"Error rendering mission on map: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 System.Diagnostics.Debug.WriteLine($"RenderMissionOnMapAsync error: {ex}");
             }
@@ -273,6 +371,8 @@ namespace DjiWaypointManager
         {
             try
             {
+                UpdateStatusBar("Loading mission file...");
+                
                 string tempDir = IOPath.Combine(IOPath.GetTempPath(), "DjiMission_" + Guid.NewGuid().ToString("N"));
                 IODirectory.CreateDirectory(tempDir);
                 
@@ -285,15 +385,20 @@ namespace DjiWaypointManager
 
                 if (wpml is null)
                 {
+                    UpdateStatusBar("Error: No mission file found in archive");
                     MessageBox.Show("No waylines.wpml or KML file found in the archive.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
+                UpdateStatusBar("Parsing mission data...");
+                
                 // Parse the mission
                 _mission = MissionParser.ParseMission(wpml);
                 
                 // Update UI
                 UpdateMissionUI();
+
+                UpdateStatusBar("Rendering mission on map...");
 
                 // Render on map if WebView is ready
                 if (_isWebViewReady)
@@ -301,11 +406,14 @@ namespace DjiWaypointManager
                     await RenderMissionOnMapAsync();
                 }
 
+                UpdateStatusBar($"Mission loaded: {_mission.Waypoints.Count} waypoints, {_mission.Pois.Count} POIs");
+
                 // Cleanup temp directory
                 try { IODirectory.Delete(tempDir, true); } catch { }
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Error loading mission: {ex.Message}");
                 MessageBox.Show($"Error loading mission: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -314,12 +422,14 @@ namespace DjiWaypointManager
         {
             try
             {
+                UpdateStatusBar("Restarting device scan...", true);
                 _djiDetector?.Dispose();
                 InitializeDjiDetection();
-                UpdateDeviceStatus("Rescanning for DJI devices...");
+                UpdateDeviceStatus("Restarting device scan...");
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Scan error: {ex.Message}");
                 UpdateDeviceStatus($"Error scanning devices: {ex.Message}");
             }
         }
@@ -331,7 +441,13 @@ namespace DjiWaypointManager
             
             if (_selectedDevice != null)
             {
+                UpdateConnectionStatus(true, _selectedDevice.Name);
                 RefreshDeviceFiles();
+                UpdateStatusBar($"Selected device: {_selectedDevice.Name}");
+            }
+            else
+            {
+                UpdateConnectionStatus(false);
             }
         }
 
@@ -348,6 +464,7 @@ namespace DjiWaypointManager
 
             try
             {
+                UpdateStatusBar("Downloading file from device...", true);
                 UpdateDeviceStatus("Downloading waypoint file...");
 
                 var tempDir = IOPath.Combine(IOPath.GetTempPath(), "DjiDeviceDownload");
@@ -357,14 +474,17 @@ namespace DjiWaypointManager
                 {
                     await LoadMissionFromFile(localFile);
                     UpdateDeviceStatus($"Mission loaded from device: {IOPath.GetFileName(selectedFile)}");
+                    UpdateStatusBar($"Mission loaded from device: {IOPath.GetFileName(selectedFile)}");
                 }
                 else
                 {
+                    UpdateStatusBar("Failed to download file from device");
                     UpdateDeviceStatus("Failed to download file from device");
                 }
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Download error: {ex.Message}");
                 MessageBox.Show($"Error loading mission from device: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateDeviceStatus($"Error: {ex.Message}");
             }
@@ -376,6 +496,8 @@ namespace DjiWaypointManager
 
             try
             {
+                UpdateStatusBar("Reading device files...");
+                
                 var files = _selectedDevice.GetWaypointFiles();
                 DeviceFilesListBox.Items.Clear();
                 
@@ -385,9 +507,11 @@ namespace DjiWaypointManager
                 }
 
                 UpdateDeviceStatus($"Found {files.Count} waypoint files on device");
+                UpdateStatusBar($"Found {files.Count} files on device");
             }
             catch (Exception ex)
             {
+                UpdateStatusBar($"Error reading device: {ex.Message}");
                 UpdateDeviceStatus($"Error reading device files: {ex.Message}");
             }
         }

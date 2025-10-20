@@ -29,6 +29,55 @@
                        VerticalAlignment="Center" Margin="8,4" FontWeight="Bold" Foreground="#666"/>
         </StackPanel>
 
+        <!-- Status Bar at Bottom -->
+        <StatusBar DockPanel.Dock="Bottom" Height="25" Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="0,1,0,0">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            
+            <!-- Main Status Text -->
+            <StatusBarItem Grid.Column="0">
+                <DockPanel>
+                    <!-- Scanning Progress Indicator -->
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" x:Name="ScanningIndicator" Visibility="Collapsed">
+                        <TextBlock Text="🔍" Margin="0,0,5,0" FontSize="12" VerticalAlignment="Center"/>
+                        <ProgressBar Width="100" Height="12" IsIndeterminate="True" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <!-- Status Text -->
+                    <TextBlock x:Name="StatusBarText" Text="Ready" VerticalAlignment="Center" Margin="5,0"/>
+                </DockPanel>
+            </StatusBarItem>
+            
+            <!-- Device Count -->
+            <StatusBarItem Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Devices: " FontSize="11" Foreground="#666" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="DeviceCountText" Text="0" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StatusBarItem>
+            
+            <!-- Separator -->
+            <Separator Grid.Column="2" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2"/>
+            
+            <!-- Connection Status -->
+            <StatusBarItem Grid.Column="3">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="ConnectionStatusIndicator" Width="8" Height="8" Fill="Red" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ConnectionStatusText" Text="Disconnected" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
         <!-- Main Content -->
         <Grid Margin="8">
             <Grid.ColumnDefinitions>

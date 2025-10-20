@@ -12,6 +12,7 @@ namespace DjiWaypointManager.Services
         
         public event Action<DjiRemoteControlDevice>? RemoteControlConnected;
         public event Action<DjiRemoteControlDevice>? RemoteControlDisconnected;
+        public event Action<string>? ScanStatusChanged;
 
         // Known DJI Remote Controller identifiers
         private readonly Dictionary<string, string> _knownDjiRemotes = new()
@@ -32,6 +33,8 @@ namespace DjiWaypointManager.Services
         {
             try
             {
+                ScanStatusChanged?.Invoke("Starting device monitoring...");
+                
                 // Monitor USB device changes
                 var query = new WqlEventQuery("SELECT * FROM Win32_VolumeChangeEvent WHERE EventType = 2");
                 _usbWatcher = new ManagementEventWatcher(query);
@@ -45,17 +48,43 @@ namespace DjiWaypointManager.Services
             }
             catch (Exception ex)
             {
+                ScanStatusChanged?.Invoke($"Error starting monitoring: {ex.Message}");
                 Debug.WriteLine($"Error starting DJI device monitoring: {ex.Message}");
             }
         }
 
         private void ScanForDjiDevices()
         {
-            // Scan for MTP devices (Android phones/DJI Smart Controllers)
-            ScanMtpDevices();
-            
-            // Scan for HID devices (DJI RC controllers)
-            ScanHidDevices();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    ScanStatusChanged?.Invoke("Scanning for MTP devices...");
+                    
+                    // Scan for MTP devices (Android phones/DJI Smart Controllers)
+                    await Task.Run(ScanMtpDevices);
+                    
+                    ScanStatusChanged?.Invoke("Scanning for HID controllers...");
+                    
+                    // Scan for HID devices (DJI RC controllers)
+                    await Task.Run(ScanHidDevices);
+                    
+                    var deviceCount = _connectedDevices.Count;
+                    if (deviceCount > 0)
+                    {
+                        ScanStatusChanged?.Invoke($"Scan complete: {deviceCount} device(s) found");
+                    }
+                    else
+                    {
+                        ScanStatusChanged?.Invoke("Scan complete: No DJI devices found");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ScanStatusChanged?.Invoke($"Scan error: {ex.Message}");
+                    Debug.WriteLine($"Error in ScanForDjiDevices: {ex.Message}");
+                }
+            });
         }
 
         private void ScanMtpDevices()
@@ -63,6 +92,7 @@ namespace DjiWaypointManager.Services
             try
             {
                 var devices = MediaDevice.GetDevices();
+                Debug.WriteLine($"Found {devices.Count()} MTP devices to check");
                 
                 foreach (var device in devices)
                 {
@@ -96,6 +126,7 @@ namespace DjiWaypointManager.Services
             try
             {
                 var hidDevices = HidDevices.Enumerate();
+                Debug.WriteLine($"Found {hidDevices.Count()} HID devices to check");
                 
                 foreach (var device in hidDevices)
                 {
@@ -176,6 +207,8 @@ namespace DjiWaypointManager.Services
         {
             Task.Run(() =>
             {
+                ScanStatusChanged?.Invoke("Device change detected, rescanning...");
+                
                 // Re-scan for devices
                 ScanForDjiDevices();
                 
@@ -197,6 +230,7 @@ namespace DjiWaypointManager.Services
 
         public void Dispose()
         {
+            ScanStatusChanged?.Invoke("Stopping device monitoring...");
             _usbWatcher?.Stop();
             _usbWatcher?.Dispose();
             _connectedDevices.Clear();
