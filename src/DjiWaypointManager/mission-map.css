@@ -1,0 +1,53 @@
+html, body, #map { height: 100%; margin: 0; padding: 0; }
+.waypoint-label { background:#0078FF; color:#fff; border-radius:50%; width:24px; height:24px; text-align:center; line-height:24px; font-weight:bold; font-size:12px; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,.3);}        
+.waypoint-selected { background:#FF6B35 !important; border-color:#FFD700 !important; animation:pulse 1s infinite; }
+.poi-marker { background:#FF6B35; color:#fff; border-radius:50%; width:20px; height:20px; text-align:center; line-height:20px; font-weight:bold; font-size:10px; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,.3);}        
+.poi-selected { background:#FF0000 !important; border-color:#FFD700 !important; animation:pulse 1s infinite; }
+@keyframes pulse { 0% {transform:scale(1);} 50% {transform:scale(1.2);} 100% {transform:scale(1);} }
+
+.legend { 
+    position: absolute; 
+    bottom: 20px; 
+    right: 20px; 
+    background: #fff; 
+    padding: 10px; 
+    font-size: 12px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,.3); 
+    border: 1px solid #ccc;
+    z-index: 1000;
+}
+.legend div { 
+    margin: 6px 0; 
+    display: flex; 
+    align-items: center; 
+}
+.legend-icon { 
+    width: 16px; 
+    height: 16px; 
+    margin-right: 8px; 
+    display: inline-block; 
+}
+
+/* Layer control styling - positioned at top-right */
+.leaflet-control-layers {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,.3);
+    border: 1px solid #ccc;
+}
+
+.leaflet-control-layers-expanded {
+    padding: 10px;
+    font-size: 13px;
+}
+
+.leaflet-control-layers label {
+    font-weight: normal;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.leaflet-control-layers input[type="radio"] {
+    margin-right: 8px;
+}

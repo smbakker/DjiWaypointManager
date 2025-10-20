@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>DJI Mission Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="mission-map.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-curve"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-arrowheads@1.4.0/dist/leaflet-arrowheads.js"></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="legend">
+        <div><span class="legend-icon" style="background:#0078FF; border-radius:50%;"></span> Waypoints</div>
+        <div><span class="legend-icon" style="background:#FF6B35; border-radius:50%;"></span> POIs</div>
+        <div><span style="color:blue;">▬</span> Straight segment</div>
+        <div><span style="color:green;">▬</span> Curved segment</div>
+        <div><span style="color:orange;">⋯</span> POI connection</div>
+        <div>🎥 Start video</div>
+        <div>⏹ Stop video</div>
+        <div>📸 Take photo</div>
+    </div>
+    <script src="mission-map.js"></script>
+</body>
+</html>

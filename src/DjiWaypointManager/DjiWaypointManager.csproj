@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="js\map-core.js" />
+    <None Remove="map.html" />
+    <None Remove="mission-map.css" />
+    <None Remove="mission-map.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="map.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+	  <Content Include="js\map-core.js">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+    <Content Include="mission-map.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="mission-map.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3485.44" />
+    <!-- USB and Device Detection Libraries -->
+    <PackageReference Include="HidLibrary" Version="3.3.40" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="MediaDevices" Version="1.9.1" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>
