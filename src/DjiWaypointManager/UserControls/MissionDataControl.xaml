@@ -1,0 +1,152 @@
+<UserControl x:Class="DjiWaypointManager.UserControls.MissionDataControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="350">
+    
+    <TabControl x:Name="DataTabControl">
+        <!-- Mission Info Tab -->
+        <TabItem Header="Mission Info" x:Name="MissionInfoTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Mission Configuration" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Drone Model:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Mission.Config.DroneInfo.DroneModel}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Fly Mode:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Mission.Config.FlyToWaylineMode}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Finish Action:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Mission.Config.FinishAction}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="RC Lost Action:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Mission.Config.ExecuteRCLostAction}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Global Speed:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Mission.Config.GlobalTransitionalSpeed, StringFormat={}{0:F1} m/s}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Total Waypoints:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Mission.Waypoints.Count}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Total POIs:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Mission.Pois.Count}" Margin="10,5"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Drone Codes:" FontWeight="Bold" Margin="0,5"/>
+                        <TextBlock Grid.Row="7" Grid.Column="1" Margin="10,5" FontSize="10" Foreground="Gray">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Enum: {0}, Sub: {1}">
+                                    <Binding Path="Mission.Config.DroneInfo.DroneEnumValue"/>
+                                    <Binding Path="Mission.Config.DroneInfo.DroneSubEnumValue"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- Waypoints Tab -->
+        <TabItem Header="Waypoints" x:Name="WaypointsTab">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="Mission Waypoints" FontWeight="Bold" 
+                           Margin="5" FontSize="14"/>
+                
+                <DataGrid x:Name="WaypointsGrid" Grid.Row="1" Margin="5"
+                          ItemsSource="{Binding Mission.Waypoints}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" AlternatingRowBackground="#F9F9F9">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="#" Binding="{Binding Index}" Width="40"/>
+                        <DataGridTextColumn Header="Lat" Binding="{Binding Lat, StringFormat=F6}" Width="80"/>
+                        <DataGridTextColumn Header="Lon" Binding="{Binding Lon, StringFormat=F6}" Width="80"/>
+                        <DataGridTextColumn Header="Alt (m)" Binding="{Binding ExecuteHeight}" Width="60"/>
+                        <DataGridTextColumn Header="Speed" Binding="{Binding Speed}" Width="50"/>
+                        <DataGridTextColumn Header="POI" Binding="{Binding PoiIndex}" Width="40"/>
+                        <DataGridTextColumn Header="Actions" Binding="{Binding ActionsText}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+
+        <!-- POIs Tab -->
+        <TabItem Header="POIs" x:Name="PoisTab">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="Points of Interest" FontWeight="Bold" 
+                           Margin="5" FontSize="14"/>
+                
+                <DataGrid x:Name="PoisGrid" Grid.Row="1" Margin="5"
+                          ItemsSource="{Binding Mission.Pois}"
+                          AutoGenerateColumns="False" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" AlternatingRowBackground="#F9F9F9">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Index}" Width="40"/>
+                        <DataGridTextColumn Header="Latitude" Binding="{Binding Lat, StringFormat=F6}" Width="*"/>
+                        <DataGridTextColumn Header="Longitude" Binding="{Binding Lon, StringFormat=F6}" Width="*"/>
+                        <DataGridTextColumn Header="Altitude (m)" Binding="{Binding Alt}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+
+        <!-- Device Files Tab -->
+        <TabItem Header="Device Files" x:Name="DeviceFilesTab">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="Waypoint Files on Device" FontWeight="Bold" 
+                           Margin="5" FontSize="14"/>
+                
+                <ListBox x:Name="DeviceFilesListBox" Grid.Row="1" Margin="5"
+                         ItemsSource="{Binding DeviceFiles}"
+                         SelectedItem="{Binding SelectedFile}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding}" FontSize="10" Foreground="Gray"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Button Grid.Row="2" Content="Refresh Files" Margin="5" 
+                        Command="{Binding RefreshDeviceFilesCommand}" 
+                        Style="{StaticResource SecondaryButton}" 
+                        HorizontalAlignment="Left"/>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</UserControl>

@@ -3,80 +3,130 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:uc="clr-namespace:DjiWaypointManager.UserControls"
         mc:Ignorable="d"
-        Title="DJI Mission Viewer" Height="800" Width="1400">
+        Title="DJI Mission Viewer" Height="800" Width="1400"
+        Closing="Window_Closing">
+    
     <DockPanel>
-        <!-- Header -->
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8" Background="#F0F0F0">
-            <Button Content="Open Mission (KMZ/ZIP)" Width="150" Margin="0,0,8,0" Click="OpenKmz_Click" 
-                    Background="#0078FF" Foreground="White" Padding="5"/>
-            <Button Content="Scan DJI Devices" Width="120" Margin="0,0,8,0" Click="ScanDjiDevices_Click" 
-                    Background="#FF6B35" Foreground="White" Padding="5"/>
-            <ComboBox x:Name="DjiDevicesComboBox" Width="200" Margin="0,0,8,0" 
-                      SelectionChanged="DjiDevicesComboBox_SelectionChanged"
-                      DisplayMemberPath="Name" />
-            <Button Content="Load from Device" Width="120" Margin="0,0,8,0" Click="LoadFromDevice_Click" 
-                    Background="#28A745" Foreground="White" Padding="5" IsEnabled="False" x:Name="LoadFromDeviceButton"/>
-            <TextBlock Text="Load a DJI mission file (.kmz/.zip with waylines.wpml)" 
-                       VerticalAlignment="Center" Margin="8,0"/>
-            <TextBlock x:Name="MissionInfo" Text="No mission loaded" 
-                       VerticalAlignment="Center" Margin="20,0" FontWeight="Bold" Foreground="#0078FF"/>
-        </StackPanel>
+        <!-- Menu Bar -->
+        <Menu DockPanel.Dock="Top" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="0,0,0,1">
+            <!-- File Menu -->
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open Mission..." 
+                          Command="{Binding OpenMissionCommand}"
+                          InputGestureText="Ctrl+O">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📁" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Export Mission..." 
+                          Command="{Binding ExportMissionCommand}"
+                          InputGestureText="Ctrl+E">
+                    <MenuItem.Icon>
+                        <TextBlock Text="💾" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Clear Mission" 
+                          Command="{Binding ClearMissionCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🗑️" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="E_xit" 
+                          Command="{Binding ExitApplicationCommand}"
+                          InputGestureText="Alt+F4">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🚪" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
 
-        <!-- Device Status Bar -->
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,0,8,8" Background="#E8F5E8">
-            <TextBlock x:Name="DeviceStatusText" Text="No DJI devices detected" 
-                       VerticalAlignment="Center" Margin="8,4" FontWeight="Bold" Foreground="#666"/>
-        </StackPanel>
+            <!-- Device Menu -->
+            <MenuItem Header="_Device">
+                <MenuItem Header="_Scan for Devices" 
+                          Command="{Binding ScanDevicesCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔍" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Load from Device..." 
+                          Command="{Binding LoadFromDeviceCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📱" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Refresh Device Files" 
+                          Command="{Binding RefreshDeviceFilesCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔄" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Device _Information..." 
+                          Command="{Binding ShowDeviceInfoCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="ℹ️" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Toggle Device _Monitoring" 
+                          Command="{Binding ToggleDeviceMonitoringCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📡" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
 
+            <!-- View Menu -->
+            <MenuItem Header="_View">
+                <MenuItem Header="Fit to _Mission" 
+                          Command="{Binding FitToMissionCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🎯" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Show _POIs" 
+                          IsCheckable="True"
+                          IsChecked="{Binding ShowPois}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📍" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Map _Options..." 
+                          Command="{Binding ShowMapOptionsCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🗺️" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <!-- Help Menu -->
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Help Topics" 
+                          Command="{Binding ShowHelpCommand}"
+                          InputGestureText="F1">
+                    <MenuItem.Icon>
+                        <TextBlock Text="❓" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_About DJI Waypoint Manager..." 
+                          Command="{Binding AboutCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="💡" FontSize="14"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!-- Simplified Device Management Header (just device selection and status) -->
+        <uc:DeviceManagementControl DockPanel.Dock="Top" DataContext="{Binding}"/>
+        
         <!-- Status Bar at Bottom -->
-        <StatusBar DockPanel.Dock="Bottom" Height="25" Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="0,1,0,0">
-            <StatusBar.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </ItemsPanelTemplate>
-            </StatusBar.ItemsPanel>
-            
-            <!-- Main Status Text -->
-            <StatusBarItem Grid.Column="0">
-                <DockPanel>
-                    <!-- Scanning Progress Indicator -->
-                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" x:Name="ScanningIndicator" Visibility="Collapsed">
-                        <TextBlock Text="🔍" Margin="0,0,5,0" FontSize="12" VerticalAlignment="Center"/>
-                        <ProgressBar Width="100" Height="12" IsIndeterminate="True" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    
-                    <!-- Status Text -->
-                    <TextBlock x:Name="StatusBarText" Text="Ready" VerticalAlignment="Center" Margin="5,0"/>
-                </DockPanel>
-            </StatusBarItem>
-            
-            <!-- Device Count -->
-            <StatusBarItem Grid.Column="1">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Devices: " FontSize="11" Foreground="#666" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="DeviceCountText" Text="0" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
-                </StackPanel>
-            </StatusBarItem>
-            
-            <!-- Separator -->
-            <Separator Grid.Column="2" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2"/>
-            
-            <!-- Connection Status -->
-            <StatusBarItem Grid.Column="3">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse x:Name="ConnectionStatusIndicator" Width="8" Height="8" Fill="Red" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ConnectionStatusText" Text="Disconnected" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                </StackPanel>
-            </StatusBarItem>
-        </StatusBar>
+        <uc:StatusBarControl DockPanel.Dock="Bottom" DataContext="{Binding}"/>
 
         <!-- Main Content -->
         <Grid Margin="8">
@@ -86,164 +136,15 @@
                 <ColumnDefinition Width="*" MinWidth="400"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Panel with Tabs -->
-            <TabControl Grid.Column="0" Margin="0,0,4,0" x:Name="DataTabControl">
-                <!-- Mission Info Tab -->
-                <TabItem Header="Mission Info" x:Name="MissionInfoTab">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="10">
-                            <TextBlock Text="Mission Configuration" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
-                            
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Drone Model:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="DroneModelText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Fly Mode:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="FlyModeText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Finish Action:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="FinishActionText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="RC Lost Action:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="RCLostActionText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Global Speed:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="GlobalSpeedText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Total Waypoints:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TotalWaypointsText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Total POIs:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TotalPoisText" Text="-" Margin="10,5"/>
-
-                                <TextBlock Grid.Row="7" Grid.Column="0" Text="Drone Codes:" FontWeight="Bold" Margin="0,5"/>
-                                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="DroneCodesText" Text="-" Margin="10,5" FontSize="10" Foreground="Gray"/>
-                            </Grid>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <!-- Waypoints Tab -->
-                <TabItem Header="Waypoints" x:Name="WaypointsTab">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Text="Mission Waypoints" FontWeight="Bold" 
-                                   Margin="5" FontSize="14"/>
-                        
-                        <DataGrid x:Name="WaypointsGrid" Grid.Row="1" Margin="5"
-                                  AutoGenerateColumns="False" IsReadOnly="True"
-                                  SelectionChanged="WaypointsGrid_SelectionChanged"
-                                  GridLinesVisibility="Horizontal" AlternatingRowBackground="#F9F9F9">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="#" Binding="{Binding Index}" Width="40"/>
-                                <DataGridTextColumn Header="Lat" Binding="{Binding Lat, StringFormat=F6}" Width="80"/>
-                                <DataGridTextColumn Header="Lon" Binding="{Binding Lon, StringFormat=F6}" Width="80"/>
-                                <DataGridTextColumn Header="Alt (m)" Binding="{Binding ExecuteHeight}" Width="60"/>
-                                <DataGridTextColumn Header="Speed" Binding="{Binding Speed}" Width="50"/>
-                                <DataGridTextColumn Header="POI" Binding="{Binding PoiIndex}" Width="40"/>
-                                <DataGridTextColumn Header="Actions" Binding="{Binding ActionsText}" Width="*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </TabItem>
-
-                <!-- POIs Tab -->
-                <TabItem Header="POIs" x:Name="PoisTab">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Text="Points of Interest" FontWeight="Bold" 
-                                   Margin="5" FontSize="14"/>
-                        
-                        <DataGrid x:Name="PoisGrid" Grid.Row="1" Margin="5"
-                                  AutoGenerateColumns="False" IsReadOnly="True"
-                                  SelectionChanged="PoisGrid_SelectionChanged"
-                                  GridLinesVisibility="Horizontal" AlternatingRowBackground="#F9F9F9">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding Index}" Width="40"/>
-                                <DataGridTextColumn Header="Latitude" Binding="{Binding Lat, StringFormat=F6}" Width="*"/>
-                                <DataGridTextColumn Header="Longitude" Binding="{Binding Lon, StringFormat=F6}" Width="*"/>
-                                <DataGridTextColumn Header="Altitude (m)" Binding="{Binding Alt}" Width="80"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </TabItem>
-
-                <!-- Device Files Tab -->
-                <TabItem Header="Device Files" x:Name="DeviceFilesTab">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Text="Waypoint Files on Device" FontWeight="Bold" 
-                                   Margin="5" FontSize="14"/>
-                        
-                        <ListBox x:Name="DeviceFilesListBox" Grid.Row="1" Margin="5"
-                                 SelectionChanged="DeviceFilesListBox_SelectionChanged">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding}" FontSize="10" Foreground="Gray"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-
-                        <Button Grid.Row="2" Content="Refresh Files" Margin="5" Padding="8,3" 
-                                Click="RefreshDeviceFiles_Click" HorizontalAlignment="Left"/>
-                    </Grid>
-                </TabItem>
-            </TabControl>
+            <!-- Left Panel - Mission Data -->
+            <uc:MissionDataControl Grid.Column="0" Margin="0,0,4,0" DataContext="{Binding}"/>
 
             <!-- GridSplitter for resizing -->
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" 
                           Background="#DDD" ShowsPreview="True" Cursor="SizeWE"/>
 
-            <!-- Map Panel -->
-            <Grid Grid.Column="2" Margin="4,0,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Mission Map" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-                    <Button Content="Fit to Mission" Margin="20,0,0,0" Padding="8,3" Click="FitToMission_Click"/>
-                    <CheckBox x:Name="ShowPoisCheckbox" Content="Show POIs" Margin="15,0,0,0" 
-                              IsChecked="True" Checked="ShowPois_Changed" Unchecked="ShowPois_Changed"/>
-                </StackPanel>
-                
-                <Border x:Name="WebViewContainer" Grid.Row="1" Background="LightGray" BorderBrush="#CCC" BorderThickness="1">
-                    <TextBlock Text="Map will be loaded here..." HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               Foreground="#666" FontSize="16"/>
-                </Border>
-            </Grid>
+            <!-- Right Panel - Map -->
+            <uc:MapControl Grid.Column="2" Margin="4,0,0,0" DataContext="{Binding}"/>
         </Grid>
     </DockPanel>
 </Window>
