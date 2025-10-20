@@ -1,0 +1,103 @@
+<Window x:Class="DjiWaypointManager.Views.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DJI Waypoint Manager" 
+        Height="400" Width="600"
+        WindowStyle="None" 
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True">
+    
+    <Grid>
+        <!-- Drop Shadow -->
+        <Border Background="Black" Opacity="0.3" CornerRadius="15" Margin="5">
+            <Border.Effect>
+                <BlurEffect Radius="15"/>
+            </Border.Effect>
+        </Border>
+        
+        <!-- Main Content -->
+        <Border Background="White" CornerRadius="10" Margin="5">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="10" Opacity="0.3"/>
+            </Border.Effect>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Logo/Image Area -->
+                <Grid Grid.Row="0" Background="#F8F9FA">
+                    <Grid.OpacityMask>
+                        <RadialGradientBrush>
+                            <GradientStop Color="White" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Grid.OpacityMask>
+                    
+                    <!-- Placeholder for splash.png -->
+                    <Image x:Name="SplashImage" 
+                           Source="splash.png" 
+                           Stretch="Uniform"
+                           MaxHeight="200"
+                           Margin="20"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                    
+                    <!-- Fallback when image is not found -->
+                    <Grid x:Name="FallbackContent" Visibility="Collapsed">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="??" FontSize="80" HorizontalAlignment="Center" Margin="0,20"/>
+                            <TextBlock Text="DJI WAYPOINT MANAGER" 
+                                       FontSize="24" 
+                                       FontWeight="Bold" 
+                                       Foreground="#0078FF"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                
+                <!-- Application Name -->
+                <TextBlock Grid.Row="1" 
+                           Text="DJI Waypoint Manager" 
+                           Style="{StaticResource SplashTitle}"
+                           Margin="0,20,0,10"/>
+                
+                <!-- Version Info -->
+                <TextBlock Grid.Row="2" 
+                           Text="Version 2.0.0 - .NET 9 Edition" 
+                           Style="{StaticResource SplashSubtitle}"
+                           Margin="0,0,0,10"/>
+                
+                <!-- Loading Status -->
+                <StackPanel Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,20">
+                    <TextBlock x:Name="LoadingText" 
+                               Text="Loading application..." 
+                               Style="{StaticResource SplashStatus}"
+                               Margin="0,0,0,10"/>
+                    
+                    <ProgressBar x:Name="LoadingProgress"
+                                 Width="300"
+                                 Style="{StaticResource SplashProgress}"
+                                 IsIndeterminate="True"/>
+                </StackPanel>
+                
+                <!-- Copyright -->
+                <TextBlock Grid.Row="4" 
+                           Text="(c) 2024 - Professional Drone Mission Management" 
+                           FontSize="10" 
+                           Foreground="#BDC3C7"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

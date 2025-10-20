@@ -114,4 +114,34 @@
         <Setter Property="Padding" Value="8"/>
     </Style>
     
+    <!-- Splash Screen Styles -->
+    <Style x:Key="SplashTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Light"/>
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="#2C3E50"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SplashSubtitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="#7F8C8D"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SplashStatus" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#95A5A6"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SplashProgress" TargetType="ProgressBar">
+        <Setter Property="Background" Value="#ECF0F1"/>
+        <Setter Property="Foreground" Value="#3498DB"/>
+        <Setter Property="Height" Value="4"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
 </ResourceDictionary>

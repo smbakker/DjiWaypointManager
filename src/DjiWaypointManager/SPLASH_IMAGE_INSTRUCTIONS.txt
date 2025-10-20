@@ -1,0 +1,32 @@
+# SPLASH IMAGE INSTRUCTIONS
+
+## ?? Create Your splash.png File
+
+To complete the splash screen setup, you need to create a `splash.png` file in this directory.
+
+### ?? Recommended Specifications:
+- **File Name**: splash.png (exactly)
+- **Size**: 600x400 pixels (or 800x600 for higher resolution)
+- **Format**: PNG with transparency support
+- **Background**: Transparent or white
+- **Content**: Your company logo, DJI drone imagery, or professional design
+
+### ?? Suggested Content Ideas:
+- DJI drone silhouettes
+- Waypoint/mapping graphics
+- Company branding
+- Professional technology themes
+- Aviation/flight themes
+
+### ?? Once you add splash.png:
+1. Place the file in the project root (same folder as this file)
+2. Build and run the application
+3. Your custom splash screen will appear on startup!
+
+### ?? Note:
+If splash.png is missing, the application will show a beautiful fallback design with:
+- ?? Drone emoji
+- "DJI WAYPOINT MANAGER" text
+- Professional styling
+
+The splash screen is fully functional even without a custom image!
